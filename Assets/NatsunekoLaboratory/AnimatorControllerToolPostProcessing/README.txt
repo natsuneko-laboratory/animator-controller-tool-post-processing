@@ -9,4 +9,4 @@ Unity における以下の挙動を書き換えます。
 
 ## License
 
-MIT by Natsuneko <https://twitter.com/6jz>
+MS-RSL by Natsuneko <https://twitter.com/6jz>

@@ -11,12 +11,13 @@ Rewrite the behavior of AnimatorControllerTool to be the default setting recomme
 
 ## Installation
 
-1. Download UnityPackage from BOOTH (Recommended)
+1. Download UnityPackage from GitHub Releases
 2. Install via NPM Scoped Registry
+3. Clone GitHub Repository and Copy Scripts
 
 ### Download UnityPackage
 
-You can download latest version of UnityPackage from BOOTH (Not Yet Provided).
+You can download latest version of UnityPackage from GitHub Releases (Not Yet Provided).
 Extract downloaded zip package and install UnityPackage into your project.
 
 ### Install via NPM
@@ -28,9 +29,9 @@ If the package manifest file already has a `scopedRegistries` section, it will b
 {
   "scopedRegistries": [
     {
-      "name": "Mochizuki",
+      "name": "Natsuneko Laboratory",
       "url": "https://registry.npmjs.com",
-      "scopes": ["moe.mochizuki"]
+      "scopes": ["moe.natsuneko"]
     }
   ]
 }
@@ -39,7 +40,7 @@ If the package manifest file already has a `scopedRegistries` section, it will b
 And the following line to the `dependencies` section:
 
 ```json
-"moe.mochizuki.animator-controller-tool-post-processing": "VERSION"
+"moe.natsuneko.animator-controller-tool-post-processing": "VERSION"
 ```
 
 ## How to use
@@ -48,4 +49,6 @@ None, this editor extension is automatically enabled/worked
 
 ## License
 
-MIT by [@6jz](https://twitter.com/6jz)
+MS-RSL by [@6jz](https://twitter.com/6jz)
+
+If you want to see/use/modify the source code under a free license (MIT), consider supporting it with GitHub Sponsors, Patreon or Pixiv Fanbox (monthly or yearly donations are supported).
