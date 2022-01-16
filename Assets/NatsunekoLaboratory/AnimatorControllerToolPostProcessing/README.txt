@@ -9,4 +9,4 @@ Unity における以下の挙動を書き換えます。
 
 ## License
 
-MS-RSL by Natsuneko <https://twitter.com/6jz>
+License Zero Parity 7.0.0 (see LICENSE-PARITY file) and MIT (contributions, see LICENSE-MIT file) with exception License Zero Patron 1.0.0 (see LICENSE-PATRON file)
