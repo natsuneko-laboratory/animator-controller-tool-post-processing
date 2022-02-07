@@ -1,0 +1,33 @@
+name: "Release by Tag"
+
+on:
+  push:
+    tags:
+      - v\d+\.\d+\.\d+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: true
+
+      - uses: natsuneko-laboratory/get-meta-from-glob@main
+        with:
+          patterns: |
+            Assets/NatsunekoLaboratory/AnimatorControllerToolPostProcessing/**/*.*
+          output: ./MetaList
+
+      - run: |
+          mkdir ./dist
+      - uses: natsuneko-laboratory/create-unitypackage@main
+        with:
+          meta: ./MetaList
+          output: dist/AnimatorControllerToolPostProcessing.unitypackage
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: AnimatorControllerToolPostProcessing.unitypackage
+          path: dist/AnimatorControllerToolPostProcessing.unitypackage
