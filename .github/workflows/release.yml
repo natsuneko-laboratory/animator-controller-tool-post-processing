@@ -27,7 +27,7 @@ jobs:
           meta: ./MetaList
           output: dist/AnimatorControllerToolPostProcessing.unitypackage
 
-      - uses: noelware/s3-action@v1.2.0
+      - uses: noelware/s3-action@1.2.0
         with:
           directories: ./dist
           access-key: ${{ secrets.AWS_S3_ACCESS_KEY }}
