@@ -27,7 +27,11 @@ jobs:
           meta: ./MetaList
           output: dist/AnimatorControllerToolPostProcessing.unitypackage
 
-      - uses: actions/upload-artifact@v2
+      - uses: noelware/s3-action@v1.2.0
         with:
-          name: AnimatorControllerToolPostProcessing.unitypackage
-          path: dist/AnimatorControllerToolPostProcessing.unitypackage
+          directories: ./dist
+          access-key: ${{ secrets.AWS_S3_ACCESS_KEY }}
+          secret-key: ${{ secrets.AWS_S3_SECRET_KEY }}
+          use-wasabi: true
+          bucket: assets.natsuneko.moe
+          
