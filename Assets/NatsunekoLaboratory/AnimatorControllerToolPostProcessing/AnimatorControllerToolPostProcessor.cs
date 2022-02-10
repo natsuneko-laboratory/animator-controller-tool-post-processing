@@ -93,11 +93,20 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
 
         private static ChildAnimatorState[] ModifyNewState(ChildAnimatorState[] oldStates)
         {
-            var lastState = oldStates.Last();
-            lastState.state.writeDefaultValues = false;
-
             var newStates = oldStates;
-            newStates[newStates.Length - 1] = lastState;
+
+            foreach (var (oldState, i) in oldStates.Select((w, i) => (w, i)))
+            {
+                if (i < _previousStateCount)
+                {
+                    newStates[i] = oldState;
+                    continue;
+                }
+
+                var newState = oldState;
+                newState.state.writeDefaultValues = false;
+                newStates[i] = newState;
+            }
 
             return newStates;
         }
