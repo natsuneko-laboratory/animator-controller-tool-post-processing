@@ -1,0 +1,42 @@
+name: "Release UnityPackage by Pushing Tag"
+
+on:
+  push:
+    tags:
+      - v\d+\.\d+\.\d+
+  workflow_dispatch:
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      name: ${{ steps.vars.outputs.name }}
+      version: ${{ steps.vars.outputs.version }}
+    steps:
+      - id: vars
+        env:
+          NAME: AnimatorControllerToolPostProcessing
+        run: |
+          VERSION=$(echo ${{ github.ref }} | sed -e 's/refs\/tags\///' | sed -e 's/refs\/heads\///')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "name=$NAME" >> $GITHUB_OUTPUT
+
+  packaging:
+    runs-on: ubuntu-latest
+    needs: [setup]
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          lfs: false
+
+      - run: |
+          mkdir ./dist
+      - uses: natsuneko-laboratory/create-unitypackage@v2.1.0
+        with:
+          package: Assets/NatsunekoLaboratory/${{ needs.setup.outputs.name }}/package.json
+          output: dist/${{ needs.setup.outputs.name }}-${{ needs.setup.outputs.version }}.unitypackage
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: ${{ needs.setup.outputs.name }}
+          path: ./dist
