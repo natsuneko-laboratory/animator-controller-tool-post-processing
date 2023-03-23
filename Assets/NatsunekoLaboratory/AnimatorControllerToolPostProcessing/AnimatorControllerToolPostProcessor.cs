@@ -1,7 +1,7 @@
-﻿// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+﻿// ------------------------------------------------------------------------------------------
 //  Copyright (c) Natsuneko. All rights reserved.
-//  Licensed under the License Zero Parity 7.0.0 (see LICENSE-PARITY file) and MIT (contributions, see LICENSE-MIT file) with exception License Zero Patron 1.0.0 (see LICENSE-PATRON file)
-// -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+//  Licensed under the MIT License. See LICENSE in the project root for license information.
+// ------------------------------------------------------------------------------------------
 
 using System.Linq;
 
@@ -14,11 +14,50 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
 {
     public static class AnimatorControllerToolPostProcessor
     {
+        private const string FeatureToggleWriteDefaultsMenu = "NatsunekoLaboratory/Behaviours/Toggle Write Defaults";
+        private const string FeatureToggleWriteDefaultsKey = "NatsunekoLaboratory.AnimatorControllerToolPostProcessing.ToggleWriteDefaults";
+
+        private const string FeatureToggleLayerWeightMenu = "NatsunekoLaboratory/Behaviours/Toggle Layer Weight";
+        private const string FeatureToggleLayerWeightKey = "NatsunekoLaboratory.AnimatorControllerToolPostProcessing.ToggleLayerWeight";
+
         private static AnimatorController _previousObj;
         private static StateMachineGraph _previousGraph;
         private static int _previousLayerCount;
         private static int _previousLayerIndex;
         private static int _previousStateCount;
+
+        private static bool IsWriteDefaultsEnabled => EditorPrefs.GetBool(FeatureToggleWriteDefaultsKey, true);
+
+        private static bool IsLayerWeightEnabled => EditorPrefs.GetBool(FeatureToggleLayerWeightKey, true);
+
+
+        [MenuItem(FeatureToggleWriteDefaultsMenu)]
+        private static void ToggleWriteDefaultsBehaviour()
+        {
+            EditorPrefs.SetBool(FeatureToggleWriteDefaultsKey, !IsWriteDefaultsEnabled);
+        }
+
+        [MenuItem(FeatureToggleWriteDefaultsMenu, true)]
+        private static bool ValidateWriteDefaultsBehaviourValue()
+        {
+            Menu.SetChecked(FeatureToggleWriteDefaultsMenu, IsWriteDefaultsEnabled);
+            Cleanup();
+            return true;
+        }
+
+        [MenuItem(FeatureToggleLayerWeightMenu)]
+        private static void ToggleLayerWeightBehaviour()
+        {
+            EditorPrefs.SetBool(FeatureToggleLayerWeightKey, !IsLayerWeightEnabled);
+        }
+
+        [MenuItem(FeatureToggleLayerWeightMenu, true)]
+        private static bool ValidateLayerWeightBehaviourValue()
+        {
+            Menu.SetChecked(FeatureToggleLayerWeightMenu, IsLayerWeightEnabled);
+            Cleanup();
+            return true;
+        }
 
         [InitializeOnLoadMethod]
         private static void OnInitializeOnLoad()
@@ -29,6 +68,9 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
 
         private static void OnUpdate()
         {
+            if (!IsWriteDefaultsEnabled && !IsLayerWeightEnabled)
+                return; // nop
+
             var tool = AnimatorControllerTool.GetCurrentAnimatorControllerTool();
             if (tool == null)
             {
@@ -45,8 +87,11 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
             if (controller != _previousObj)
                 Setup(tool, controller, graph);
 
-            OnHandleLayerAdded(tool, controller);
-            OnHandleStateAdded(tool);
+            if (IsLayerWeightEnabled)
+                OnHandleLayerAdded(tool, controller);
+
+            if (IsWriteDefaultsEnabled)
+                OnHandleStateAdded(tool);
 
             _previousObj = controller;
             _previousGraph = graph;
