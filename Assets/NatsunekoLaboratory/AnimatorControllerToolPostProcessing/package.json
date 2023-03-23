@@ -1,0 +1,25 @@
+{
+  "name": "cat.natsuneko.animator-controller-tool-post-processing",
+  "version": "1.0.0",
+  "description": "Rewrite the behavior of AnimatorControllerTool to be the default setting recommended by VRChat.",
+  "displayName": "Animator Controller Tool Post Processing",
+  "unity": "2019.4",
+  "dependencies": {},
+  "vpmDependencies": {},
+  "legacyFolders": {
+    "Assets\\NatsunekoLaboratory\\AnimatorControllerToolPostProcessing": "e6b9d744f4c9a334fa03cf358e4e4720"
+  },
+  "license": "MIT",
+  "keywords": [
+    "Unity",
+    "Asset",
+    "Animator",
+    "Animation",
+    "StateMachine"
+  ],
+  "author": {
+    "name": "Natsuneko",
+    "email": "me@natsuneko.cat",
+    "url": "https://natsuneko.cat"
+  }
+}
