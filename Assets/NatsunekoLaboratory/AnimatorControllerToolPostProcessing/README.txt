@@ -7,6 +7,18 @@ Unity における以下の挙動を書き換えます。
 
 なお、このエディター拡張はスクリプトが読み込まれている (つまりはプロジェクト内に存在する) 限り常時有効となります。
 
-## License
+## 使い方
 
-License Zero Parity 7.0.0 (see LICENSE-PARITY file) and MIT (contributions, see LICENSE-MIT file) with exception License Zero Patron 1.0.0 (see LICENSE-PATRON file)
+いれるだけで OK です。
+もし機能を無効にしたい場合は、メニューバーの `NatsunekoLaboratory` → `Behaviours` の各項目から切り替えられます。
+
+
+## 既知のバグ
+
+名前長すぎるのでだれか良い名前考えてほしいです
+
+
+## サポート
+
+Discord までお越しください。
+
