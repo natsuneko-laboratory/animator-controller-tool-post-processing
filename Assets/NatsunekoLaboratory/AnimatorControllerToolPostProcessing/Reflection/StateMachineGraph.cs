@@ -3,29 +3,23 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 // ------------------------------------------------------------------------------------------
 
-using System;
-using System.Reflection;
-
-using NatsunekoLaboratory.AnimatorControllerToolPostProcessing.Reflection.Expressions;
+using Refractions.Attributes;
 
 using UnityEditor.Animations;
-using UnityEditor.Graphs;
+
+// ReSharper disable InconsistentNaming
 
 namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing.Reflection
 {
-    public sealed class StateMachineGraph : ReflectionClass
+    public interface IStateMachineGraph
     {
-        private static readonly Type T;
+        [Instance]
+        [NonPublic]
+        [Field]
+        AnimatorStateMachine m_ActiveStateMachine { get; set; }
 
-        public int InstanceId => RawInstance.GetInstanceID();
-
-        public AnimatorStateMachine ActiveStateMachine => InvokeField<AnimatorStateMachine>("m_ActiveStateMachine", BindingFlags.NonPublic | BindingFlags.Instance);
-
-        static StateMachineGraph()
-        {
-            T = typeof(Graph).Assembly.GetType("UnityEditor.Graphs.AnimationStateMachine.Graph");
-        }
-
-        public StateMachineGraph(object instance) : base(instance, T) { }
+        [Instance]
+        [Public]
+        int GetInstanceID();
     }
 }

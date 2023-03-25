@@ -3,31 +3,16 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 // ------------------------------------------------------------------------------------------
 
-using System;
 using System.Collections.Generic;
-using System.Reflection;
 
-using NatsunekoLaboratory.AnimatorControllerToolPostProcessing.Reflection.Expressions;
-
-using UnityEditor;
+using Refractions.Attributes;
 
 namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing.Reflection
 {
-    public static class UndoOverlapped
+    public interface IUndo
     {
-        private static readonly Type T;
-
-        static UndoOverlapped()
-        {
-            T = typeof(Undo);
-        }
-
-        public static void GetRecords(out List<string> undoRecords, out List<string> redoRecords)
-        {
-            undoRecords = new List<string>();
-            redoRecords = new List<string>();
-
-            ReflectionStaticClass.InvokeMethod(T, "GetRecords", BindingFlags.NonPublic | BindingFlags.Static, undoRecords, redoRecords);
-        }
+        [NonPublic]
+        [Static]
+        void GetRecords(List<string> undoRecords, List<string> redoRecords);
     }
 }

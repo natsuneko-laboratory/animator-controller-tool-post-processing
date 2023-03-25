@@ -3,12 +3,17 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 // ------------------------------------------------------------------------------------------
 
+using System.Collections.Generic;
 using System.Linq;
 
 using NatsunekoLaboratory.AnimatorControllerToolPostProcessing.Reflection;
 
+using Refractions;
+using Refractions.Extensions;
+
 using UnityEditor;
 using UnityEditor.Animations;
+using UnityEditor.Graphs;
 
 namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
 {
@@ -21,10 +26,19 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
         private const string FeatureToggleLayerWeightKey = "NatsunekoLaboratory.AnimatorControllerToolPostProcessing.ToggleLayerWeight";
 
         private static AnimatorController _previousObj;
-        private static StateMachineGraph _previousGraph;
+        private static int? _previousGraph;
         private static int _previousLayerCount;
         private static int _previousLayerIndex;
         private static int _previousStateCount;
+
+        // ReSharper disable once InconsistentNaming
+        private static Refraction<IAnimatorControllerTool> AnimatorControllerTool;
+
+        // ReSharper disable once InconsistentNaming
+        private static Refraction<IUndo> Undo;
+
+        // ReSharper disable once InconsistentNaming
+        private static Refraction<IStateMachineGraph> StateMachineGraph;
 
         private static bool IsWriteDefaultsEnabled => EditorPrefs.GetBool(FeatureToggleWriteDefaultsKey, true);
 
@@ -64,6 +78,15 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
         {
             EditorApplication.update -= OnUpdate;
             EditorApplication.update += OnUpdate;
+
+            // ReSharper disable once InconsistentNaming
+            var UnityEditorGraphs = RefractionResolver.FromType<Graph>();
+            AnimatorControllerTool = UnityEditorGraphs.Get<IAnimatorControllerTool>("UnityEditor.Graphs.AnimatorControllerTool");
+            StateMachineGraph = UnityEditorGraphs.Get<IStateMachineGraph>("UnityEditor.Graphs.AnimationStateMachine.Graph");
+
+            // ReSharper disable once InconsistentNaming
+            var UnityEditorCoreModules = RefractionResolver.FromType<Undo>();
+            Undo = UnityEditorCoreModules.Get<IUndo>("UnityEditor.Undo");
         }
 
         private static void OnUpdate()
@@ -71,17 +94,17 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
             if (!IsWriteDefaultsEnabled && !IsLayerWeightEnabled)
                 return; // nop
 
-            var tool = AnimatorControllerTool.GetCurrentAnimatorControllerTool();
-            if (tool == null)
+            var tool = AnimatorControllerTool.ProxyGet(w => w.tool).ToInstantiate(AnimatorControllerTool);
+            if (tool.InnerInstance == null)
             {
                 Cleanup();
                 return;
             }
 
-            var controller = tool.AnimatorController;
-            var graph = tool.StateMachineGraph;
+            var controller = tool.ProxyGet(w => w.m_AnimatorController);
+            var graph = tool.ProxyGet(w => w.stateMachineGraph).ToInstantiate(StateMachineGraph);
 
-            if (controller == null || graph == null)
+            if (controller == null || graph.InnerInstance == null)
                 return;
 
             if (controller != _previousObj)
@@ -94,17 +117,21 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
                 OnHandleStateAdded(tool);
 
             _previousObj = controller;
-            _previousGraph = graph;
+            _previousGraph = graph.ProxyInvoke(w => w.GetInstanceID());
             _previousLayerCount = controller.layers.Length;
-            _previousLayerIndex = tool.SelectedLayerIndex;
-            _previousStateCount = graph?.ActiveStateMachine == null ? 0 : graph.ActiveStateMachine.states.Length;
+            _previousLayerIndex = tool.ProxyGet(w => w.selectedLayerIndex);
+
+            var activeStateMachine = graph.InnerInstance == null ? null : graph.ProxyGet(w => w.m_ActiveStateMachine);
+            _previousStateCount = activeStateMachine == null ? 0 : activeStateMachine.states.Length;
         }
 
-        private static void Setup(AnimatorControllerTool tool, AnimatorController controller, StateMachineGraph graph)
+        private static void Setup(Refraction<IAnimatorControllerTool> tool, AnimatorController controller, Refraction<IStateMachineGraph> graph)
         {
             _previousLayerCount = controller.layers.Length;
-            _previousLayerIndex = tool.SelectedLayerIndex;
-            _previousStateCount = graph?.ActiveStateMachine == null ? 0 : graph.ActiveStateMachine.states.Length;
+            _previousLayerIndex = tool.ProxyGet(w => w.selectedLayerIndex);
+
+            var activeStateMachine = graph.InnerInstance == null ? null : graph.ProxyGet(w => w.m_ActiveStateMachine);
+            _previousStateCount = activeStateMachine == null ? 0 : activeStateMachine.states.Length;
         }
 
         private static void Cleanup()
@@ -117,18 +144,19 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
 
         #region OnHandleStateAdded
 
-        private static void OnHandleStateAdded(AnimatorControllerTool tool)
+        private static void OnHandleStateAdded(Refraction<IAnimatorControllerTool> tool)
         {
-            if (tool.SelectedLayerIndex != _previousLayerIndex)
+            if (tool.ProxyGet(w => w.selectedLayerIndex) != _previousLayerIndex)
                 return;
 
-            var graph = tool.StateMachineGraph;
-            if (!graph.IsAlive() && graph.InstanceId != _previousGraph.InstanceId)
+            var graph = tool.ProxyGet(w => w.stateMachineGraph).ToInstantiate(StateMachineGraph);
+            if (graph.InnerInstance == null && graph.ProxyInvoke(w => w.GetInstanceID()) != _previousGraph)
                 return;
 
-            var states = graph.ActiveStateMachine == null ? new ChildAnimatorState[] { } : graph.ActiveStateMachine.states;
-            if (graph.ActiveStateMachine != null && states.Length > _previousStateCount && IsStateAddedByUser())
-                graph.ActiveStateMachine.states = ModifyNewState(states);
+            var activeStateMachine = graph.ProxyGet(w => w.m_ActiveStateMachine);
+            var states = activeStateMachine == null ? new ChildAnimatorState[] { } : activeStateMachine.states;
+            if (activeStateMachine != null && states.Length > _previousStateCount && IsStateAddedByUser())
+                activeStateMachine.states = ModifyNewState(states);
         }
 
         private static bool IsStateAddedByUser()
@@ -160,20 +188,26 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
 
         #region OnHandleLayerAdded
 
-        private static void OnHandleLayerAdded(AnimatorControllerTool tool, AnimatorController controller)
+        private static void OnHandleLayerAdded(Refraction<IAnimatorControllerTool> tool, AnimatorController controller)
         {
             if (controller.layers.Length > _previousLayerCount && IsLayerAddedByUser(tool, controller))
                 controller.layers = ModifyNewLayer(controller.layers);
         }
 
-        private static bool IsLayerAddedByUser(AnimatorControllerTool tool, AnimatorController controller)
+        private static bool IsLayerAddedByUser(Refraction<IAnimatorControllerTool> tool, AnimatorController controller)
         {
-            if (tool.SelectedLayerIndex != controller.layers.Length - 1)
+            if (tool.ProxyGet(w => w.selectedLayerIndex) != controller.layers.Length - 1)
                 return false;
 
-            UndoOverlapped.GetRecords(out var undo, out _);
+            var undoRecords = new List<string>();
+            var redoRecords = new List<string>();
 
-            return undo.Last() == "Layer Added";
+            Undo.ProxyInvoke(w => w.GetRecords(undoRecords, redoRecords));
+
+            if (undoRecords.Count == 0)
+                return false;
+
+            return undoRecords.Last() == "Layer Added";
         }
 
         private static AnimatorControllerLayer[] ModifyNewLayer(AnimatorControllerLayer[] oldLayers)

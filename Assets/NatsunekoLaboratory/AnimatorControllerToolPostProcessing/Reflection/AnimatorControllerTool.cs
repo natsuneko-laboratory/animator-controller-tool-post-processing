@@ -3,48 +3,33 @@
 //  Licensed under the MIT License. See LICENSE in the project root for license information.
 // ------------------------------------------------------------------------------------------
 
-using System;
-using System.Reflection;
+using Refractions.Attributes;
 
-using NatsunekoLaboratory.AnimatorControllerToolPostProcessing.Reflection.Expressions;
-
-using UnityEditor;
 using UnityEditor.Animations;
-using UnityEditor.Graphs;
+
+// ReSharper disable InconsistentNaming
 
 namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing.Reflection
 {
-    public sealed class AnimatorControllerTool : ReflectionClass
+    public interface IAnimatorControllerTool
     {
-        private static readonly Type T;
+        [NonPublic]
+        [Instance]
+        [Field]
+        AnimatorController m_AnimatorController { get; set; }
 
-        public AnimatorController AnimatorController => InvokeField<AnimatorController>("m_AnimatorController", BindingFlags.NonPublic | BindingFlags.Instance);
+        [Public]
+        [Instance]
+        [Field]
+        object stateMachineGraph { get; set; }
 
-        public int SelectedLayerIndex => InvokeProperty<int>("selectedLayerIndex", BindingFlags.Public | BindingFlags.Instance);
+        [Public]
+        [Static]
+        [Field]
+        object tool { get; set; }
 
-        public StateMachineGraph StateMachineGraph
-        {
-            get
-            {
-                var obj = InvokeField<object>("stateMachineGraph", BindingFlags.Public | BindingFlags.Instance);
-                return new StateMachineGraph(obj);
-            }
-        }
-
-        static AnimatorControllerTool()
-        {
-            T = typeof(Graph).Assembly.GetType("UnityEditor.Graphs.AnimatorControllerTool");
-        }
-
-        private AnimatorControllerTool(object instance) : base(instance, T) { }
-
-        public static AnimatorControllerTool GetCurrentAnimatorControllerTool()
-        {
-            var t = ReflectionStaticClass.InvokeField<EditorWindow>(T, "tool", BindingFlags.Public | BindingFlags.Static);
-            if (t == null)
-                return null;
-
-            return new AnimatorControllerTool(t);
-        }
+        [Public]
+        [Instance]
+        int selectedLayerIndex { get; set; }
     }
 }

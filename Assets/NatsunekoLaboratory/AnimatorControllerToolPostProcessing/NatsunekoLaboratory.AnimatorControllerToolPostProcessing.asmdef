@@ -1,13 +1,16 @@
 {
     "name": "NatsunekoLaboratory.AnimatorControllerToolPostProcessing",
+    "rootNamespace": "",
     "references": [],
     "includePlatforms": [
         "Editor"
     ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
-    "overrideReferences": false,
-    "precompiledReferences": [],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "NatsunekoLaboratory.Refractions.381413494.dll"
+    ],
     "autoReferenced": false,
     "defineConstraints": [],
     "versionDefines": [],
