@@ -207,7 +207,7 @@ namespace NatsunekoLaboratory.AnimatorControllerToolPostProcessing
             if (undoRecords.Count == 0)
                 return false;
 
-            return undoRecords.Last() == "Layer Added";
+            return undoRecords.Last().ToLowerInvariant() == "layer added";
         }
 
         private static AnimatorControllerLayer[] ModifyNewLayer(AnimatorControllerLayer[] oldLayers)
