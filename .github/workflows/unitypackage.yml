@@ -31,7 +31,7 @@ jobs:
 
       - run: |
           mkdir ./dist
-      - uses: natsuneko-laboratory/create-unitypackage@v2.1.0
+      - uses: natsuneko-laboratory/create-unitypackage@v2.2.0
         with:
           package: Assets/NatsunekoLaboratory/${{ needs.setup.outputs.name }}/package.json
           output: dist/${{ needs.setup.outputs.name }}-${{ needs.setup.outputs.version }}.unitypackage
